@@ -1,0 +1,37 @@
+name: Run Selenium Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  selenium-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Chrome and Chromedriver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip google-chrome-stable
+        wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(wget -q -O - https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
+        sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
+
+    - name: Run Tests
+      run: pytest tests/
