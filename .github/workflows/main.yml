@@ -1,33 +1,49 @@
-name: CI
+name: Run Selenium Tests on Multiple Browsers
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  test:
-    runs-on: macos-latest
+  selenium-tests:
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        browser: [chrome, firefox]  # Test only on Chrome and Firefox
+        os: [ubuntu-latest]
+        browser: [chrome, firefox]
 
     steps:
-    - name: Check out repository code
-      uses: actions/checkout@v2  # Check out the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2  # Set up Python environment
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: 3.9
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        if [[ ${{ matrix.browser }} == 'firefox' ]]; then
-          brew install geckodriver  # Install GeckoDriver for Firefox
-        elif [[ ${{ matrix.browser }} == 'chrome' ]]; then
-          brew install --cask chromedriver  # Install ChromeDriver
 
-    - name: Run tests
+    - name: Install Chrome and Chromedriver (if browser is Chrome)
+      if: matrix.browser == 'chrome' && matrix.os == 'ubuntu-latest'
       run: |
-        pytest tests/  # Run all tests in the /tests folder
+        sudo apt-get update
+        sudo apt-get install -y wget unzip google-chrome-stable
+
+    - name: Install Firefox and Geckodriver
+      if: matrix.browser == 'firefox'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y firefox
+
+    - name: Run Tests
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: pytest tests/
