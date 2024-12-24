@@ -9,7 +9,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 import pytest
 
-
 @pytest.fixture(params=["chrome", "firefox"])
 def driver(request):
     """Configura o WebDriver para diferentes navegadores."""
@@ -17,7 +16,7 @@ def driver(request):
 
     if browser == "chrome":
         options = ChromeOptions()
-        options.add_argument("--headless")
+        options.add_argument("-headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         driver = webdriver.Chrome(
@@ -27,7 +26,7 @@ def driver(request):
 
     elif browser == "firefox":
         options = FirefoxOptions()
-        options.headless = True
+        options.add_argument("-headless")
         driver = webdriver.Firefox(
             service=webdriver.firefox.service.Service(GeckoDriverManager().install()),
             options=options
