@@ -1,4 +1,3 @@
-import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -10,7 +9,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 import pytest
 
-@pytest.fixture(params=["chrome", "firefox"])
+@pytest.fixture(params=["chrome", "firefox", "safari"])
 def driver(request):
     """Configura o WebDriver para diferentes navegadores."""
     browser = request.param
@@ -33,11 +32,14 @@ def driver(request):
             options=options
         )
 
+    elif browser == "safari":
+        driver = webdriver.Safari()
+   
+
     else:
         raise ValueError(f"Navegador {browser} não é suportado.")
 
     
-    time.sleep(3)
     yield driver
     driver.quit()
 

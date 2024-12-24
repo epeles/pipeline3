@@ -14,8 +14,13 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        browser: [chrome, firefox]
+        include:
+          - os: ubuntu-latest
+            browser: chrome
+          - os: ubuntu-latest
+            browser: firefox
+          - os: macos-latest
+            browser: safari
 
     steps:
     - name: Checkout code
@@ -24,7 +29,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.12
+        python-version: 3.9
 
     - name: Install dependencies
       run: |
@@ -32,18 +37,23 @@ jobs:
         pip install -r requirements.txt
 
     - name: Install Chrome and Chromedriver (if browser is Chrome)
-      if: matrix.browser == 'chrome' && matrix.os == 'ubuntu-latest'
+      if: matrix.browser == 'chrome'
       run: |
         sudo apt-get update
         sudo apt-get install -y wget unzip google-chrome-stable
 
-    - name: Install Firefox and Geckodriver
+    - name: Install Firefox and Geckodriver (if browser is Firefox)
       if: matrix.browser == 'firefox'
       run: |
         sudo apt-get update
         sudo apt-get install -y firefox
 
+    - name: Enable Safari WebDriver (if browser is Safari)
+      if: matrix.browser == 'safari'
+      run: |
+        echo "Habilitando Safari WebDriver no macOS. Certifique-se de que ele esteja ativado localmente."
+
     - name: Run Tests
       env:
         BROWSER: ${{ matrix.browser }}
-      run: pytest tests/
+      run: pytest tests/ --browser $BROWSER
