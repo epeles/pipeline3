@@ -1,4 +1,4 @@
-name: Run Selenium Tests
+name: Run Selenium Tests on Multiple Browsers
 
 on:
   push:
@@ -10,7 +10,12 @@ on:
 
 jobs:
   selenium-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        browser: [chrome, firefox, safari]
 
     steps:
     - name: Checkout code
@@ -26,12 +31,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Install Chrome and Chromedriver
+    - name: Install Chrome and Chromedriver (if browser is Chrome)
+      if: matrix.browser == 'chrome' && matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y wget unzip google-chrome-stable
-        wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(wget -q -O - https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip
-        sudo unzip /tmp/chromedriver.zip -d /usr/local/bin/
+
+    - name: Install Firefox and Geckodriver (if browser is Firefox)
+      if: matrix.browser == 'firefox'
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt-get install -y firefox
+        fi
+
+    - name: Enable Safari WebDriver (if browser is Safari)
+      if: matrix.browser == 'safari' && matrix.os == 'macos-latest'
+      run: |
+        echo "Safari WebDriver deve ser habilitado no sistema macOS."
 
     - name: Run Tests
-      run: pytest tests/
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: pytest --browser $BROWSER

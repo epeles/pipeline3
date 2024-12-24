@@ -1,24 +1,48 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 import pytest
 
-@pytest.fixture
-def driver():
-    """Configura o WebDriver para o Chrome."""
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Executa sem interface gráfica
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service,options=chrome_options)
+
+@pytest.fixture(params=["chrome", "firefox", "safari"])
+def driver(request):
+    """Configura o WebDriver para diferentes navegadores."""
+    browser = request.param
+
+    if browser == "chrome":
+        options = ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        driver = webdriver.Chrome(
+            service=webdriver.chrome.service.Service(ChromeDriverManager().install()),
+            options=options
+        )
+
+    elif browser == "firefox":
+        options = FirefoxOptions()
+        options.headless = True
+        driver = webdriver.Firefox(
+            service=webdriver.firefox.service.Service(GeckoDriverManager().install()),
+            options=options
+        )
+
+    elif browser == "safari":
+        driver = webdriver.Safari()
+        # Safari não suporta modo headless diretamente
+
+    else:
+        raise ValueError(f"Navegador {browser} não é suportado.")
+
     yield driver
     driver.quit()
+
 
 def test_google_search(driver):
     """Teste para buscar um termo no Google e verificar o título da página."""
