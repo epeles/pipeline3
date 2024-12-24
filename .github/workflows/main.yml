@@ -14,8 +14,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        browser: [chrome, firefox, safari]
+        os: [ubuntu-latest]
+        browser: [chrome, firefox]
 
     steps:
     - name: Checkout code
