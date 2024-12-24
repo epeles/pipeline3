@@ -44,12 +44,7 @@ jobs:
           sudo apt-get install -y firefox
         fi
 
-    - name: Enable Safari WebDriver (if browser is Safari)
-      if: matrix.browser == 'safari' && matrix.os == 'macos-latest'
-      run: |
-        echo "Safari WebDriver deve ser habilitado no sistema macOS."
-
     - name: Run Tests
       env:
         BROWSER: ${{ matrix.browser }}
-      run: pytest --browser $BROWSER
+      run: pytest tests

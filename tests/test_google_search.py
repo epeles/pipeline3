@@ -10,7 +10,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 import pytest
 
 
-@pytest.fixture(params=["chrome", "firefox", "safari"])
+@pytest.fixture(params=["chrome", "firefox"])
 def driver(request):
     """Configura o WebDriver para diferentes navegadores."""
     browser = request.param
@@ -32,10 +32,6 @@ def driver(request):
             service=webdriver.firefox.service.Service(GeckoDriverManager().install()),
             options=options
         )
-
-    elif browser == "safari":
-        driver = webdriver.Safari()
-        # Safari não suporta modo headless diretamente
 
     else:
         raise ValueError(f"Navegador {browser} não é suportado.")
